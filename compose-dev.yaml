@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: node:${NODE_VERSION}
+    container_name: fi_frontend
+    restart: unless-stopped
+    ports:
+      - '${CLIENT_PORT}:3000'
+    environment:
+      - API_URL=${API_URL}
+    volumes:
+      - ./frontend:/app
+    working_dir: /app
+    command: npm run dev
+    networks:
+      - frontend
+  backend:
+    image: node:${NODE_VERSION}
+    container_name: fi_backend
+    restart: unless-stopped
+    ports:
+      - '${API_PORT}:${API_PORT}'
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - CLIENT_URL=${CLIENT_URL}
+      - API_HOST=${API_HOST}
+      - API_PORT=${API_PORT}
+      - API_PREFIX=${API_PREFIX}
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    command: npm run dev
+    networks:
+      - backend-mysql
+      - backend-postgres
+#  mysql:
+#    image: mysql:${MYSQL_VERSION}
+#    container_name: fi_mysql
+#    restart: unless-stopped
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+#    volumes:
+#      - ./mysql:/var/lib/mysql
+#    ports:
+#      - '3306:3306'
+#    networks:
+#      - backend-mysql
+#      - mysql-phpmyadmin
+  postgres:
+    image: postgres:${POSTGRES_VERSION}
+    container_name: fi_postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - POSTGRES_DB=funinvest
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - backend-postgres
+#  phpmyadmin:
+#    image: phpmyadmin:${PHPMYADMIN_VERSION}
+#    container_name: fi_phpmyadmin
+#    restart: unless-stopped
+#    ports:
+#      - '8080:80'
+#    environment:
+#      - PMA_HOST=mysql
+#      - PMA_USER=root
+#      - PMA_PASSWORD=${MYSQL_ROOT_PASSWORD}
+#    networks:
+#      - mysql-phpmyadmin
+networks:
+  backend-mysql:
+  backend-postgres:
+  frontend:
+  mysql-phpmyadmin:

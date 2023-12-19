@@ -1,0 +1,22 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int      @id @default(autoincrement())
+  email           String   @unique @db.VarChar(255)
+  password        String   @db.VarChar(255)
+  create_at       DateTime @default(now())
+  activated_at    DateTime @default(dbgenerated("'1970-01-01 00:00:00'"))
+  is_activated    Boolean  @default(false)
+  activation_uuid String   @unique @db.VarChar(255)
+}

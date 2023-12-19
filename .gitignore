@@ -1,0 +1,17 @@
+backend/dist
+backend/node_modules
+backend/bun.lockb
+
+frontend/dist
+frontend/node_modules
+frontend/bun.lockb
+
+mysql/*
+postgres/*
+.env
+
+compose-test.yaml
+note.md
+sandbox.ts
+
+.idea

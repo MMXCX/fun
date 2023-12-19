@@ -1,0 +1,345 @@
+openapi: 3.1.0
+info:
+  title: Funinvest API
+  version: 0.0.1
+servers:
+  - url: '{api_host}:{api_port}{api_prefix}'
+    description: Development server
+tags:
+  - name: data
+    description: Get secret data
+  - name: captcha
+    description: Captcha operations
+  - name: auth
+    description: All auth operations
+  - name: restore
+    description: Restoring password
+paths:
+  /data:
+    get:
+      tags:
+        - data
+      description: Get data only for authorization users
+      operationId: getData
+      responses:
+        '200':
+          description: Test data
+  /captcha:
+    get:
+      summary: All
+      tags:
+        - captcha
+      description: |
+        Generate new captcha and return pair of svg data and uuid
+      operationId: getCaptcha
+      responses:
+        '200':
+          description: Return new captcha data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptchaContentSchema'
+  /registration:
+    post:
+      summary: Not Auth
+      tags:
+        - auth
+      description: Create new user
+      operationId: createNewUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegSchema'
+      responses:
+        default:
+          description: When somethin is wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+                examples:
+                  - status: error
+                    message: User with this email already exist
+        '200':
+          description: On success registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenSchema'
+  /activation:
+    post:
+      summary: All
+      tags:
+        - auth
+      description: Activate exist user account
+      operationId: activateUserAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Contain activate uuid code
+              required:
+                - activateCode
+              properties:
+                activateCode:
+                  type: string
+                  format: uuid
+      responses:
+        default:
+          description: When somethin is wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+                examples:
+                  - status: error
+                    message: You account is alredy activated
+        '200':
+          description: On success registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenSchema'
+  /login:
+    post:
+      summary: Not Auth
+      tags:
+        - auth
+      description: Login to system
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginSchema'
+      responses:
+        default:
+          description: When somethin is wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+                examples:
+                  - status: error
+                    message: Wrong password
+        '200':
+          description: On success login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenSchema'
+  /logout:
+    get:
+      summary: Auth only
+      tags:
+        - auth
+      description: When logout
+      operationId: logout
+      responses:
+        default:
+          description: When something is wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+                examples:
+                  - status: error
+                    message: You are not authorize
+        '200':
+          description: When user was authorize
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+                examples:
+                  - status: ok
+                    message: Successfuly logout
+  /refresh:
+    get:
+      summary: Auth only
+      tags:
+        - auth
+      description: Return new accessToken
+      operationId: getNewAccessToken
+      responses:
+        '200':
+          description: New accessToken
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenSchema'
+  /restore:
+    post:
+      summary: Not Auth
+      tags:
+        - restore
+      description: On this endpoint we send email
+      operationId: restorePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        default:
+          description: On error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+                examples:
+                  - status: error
+                    message: Wrong email
+        '200':
+          description: When success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+                examples:
+                  - status: ok
+                    message: Instruction send to your email
+  /newpass:
+    post:
+      summary: Not Auth
+      tags:
+        - restore
+      description: Here we send new password and uuid code
+      operationId: changePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+                - uuid
+              properties:
+                password:
+                  type: string
+                  format: password
+                uuid:
+                  type: string
+                  format: uuid
+      responses:
+        default:
+          description: On error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+                examples:
+                  - status: error
+                    message: Something is wrong
+        '200':
+          description: When success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+                examples:
+                  - status: ok
+                    message: Password successfuly changed
+components:
+  schemas:
+    CaptchaContentSchema:
+      type: object
+      description: Contain captcha SVG data and UUID
+      required:
+        - uuid
+        - svg
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        svg:
+          type: string
+          format: xml-data
+      examples:
+        - uuid: 75bcddda-d199-4213-8181-fdaf0a43b320
+          svg: svg xmlns=\"http://www.w3.org/2000/svg.....
+    RegSchema:
+      type: object
+      description: Contain data for registration
+      required:
+        - email
+        - password
+        - captch
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        captcha:
+          $ref: '#/components/schemas/CaptchaSendSchema'
+    CaptchaSendSchema:
+      type: object
+      description: Pair of captcha text and uuid which sent to server
+      reqired:
+        - captchaText
+        - uuid
+      properties:
+        captchaText:
+          type: string
+          description: Text from captcha image
+        uuid:
+          type: string
+          format: uuid
+    AccessTokenSchema:
+      type: object
+      description: Contain accessToken
+      required:
+        - accessToken
+      properties:
+        accessToken:
+          type: string
+          format: jwt
+      examples:
+        - accessToken: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+    MessageSchema:
+      type: object
+      description: Contain information
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - error
+        message:
+          type: string
+      examples:
+        - status: error
+          message: Error message
+        - status: ok
+          message: Success
+    LoginSchema:
+      type: object
+      description: Contain email and password
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
