@@ -16,16 +16,17 @@ app.use(cors({
 }))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
-// app.use(Fingerprint())
+app.use(Fingerprint())
 app.use(process.env.API_PREFIX!, router)
 
 app.get('/', (req, res) => {
-  if (!req.cookies.refreshToken) {
-    res.cookie('refreshToken', 'val543', {
-      httpOnly: true,
-      maxAge: 1296e6
-    })
-  }
+
+  // if (!req.cookies.refreshToken) {
+  //   res.cookie('refreshToken', 'val543', {
+  //     httpOnly: true,
+  //     maxAge: 1296e6
+  //   })
+  // }
   // res.clearCookie('refreshToken')
 
   // res.json({ message: captcha_store.get() })
