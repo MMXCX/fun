@@ -19,4 +19,12 @@ model User {
   activated_at    DateTime @default(dbgenerated("'1970-01-01 00:00:00'"))
   is_activated    Boolean  @default(false)
   activation_uuid String   @unique @db.VarChar(255)
+  Token           Token[]
+}
+
+model Token {
+  id           Int    @id @default(autoincrement())
+  owner        User   @relation(fields: [userId], references: [id])
+  userId       Int
+  refreshToken String
 }

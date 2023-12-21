@@ -2,33 +2,49 @@ import express from 'express'
 import registrationService from '../services/registration-service'
 import validator from 'validator'
 import activationService from '../services/activation-service'
+import tokenService from '../services/token-service'
 import settings from '../settings'
-import captcha_store from '../captcha_store'
+import { PrismaClient } from '@prisma/client'
 
+const prisma = new PrismaClient()
 
 class UserController {
   registration = async (req: express.Request, res: express.Response) => {
-    const email = req.body.email ?? ''
-    const password = req.body.password ?? ''
-    const captcha_text = req.body.captcha.captcha_text ?? ''
-    const uuid = req.body.captcha.uuid ?? ''
+    try {
+      const user = await registrationService.createUser(req.body.email, req.body.password)
 
-    if (
-      !validator.isEmail(email) ||
-      !validator.isByteLength(email, { min: settings.email_min_len, max: settings.email_max_len }) ||
-      !validator.isLowercase(email) ||
-      !validator.isUUID(uuid, 4) ||
-      !captcha_store.validate(uuid, captcha_text)||
-      !validator.isByteLength(password, { min: settings.pass_min_len, max: settings.pass_max_len })
+      const payload = {
+        id: user!.id
+      }
 
-    ) {
-      res.status(400).send()
-    } else {
-      await registrationService.createUser(req.body.email, req.body.password)
-      res.status(200).json()
+      const { accessToken, refreshToken } = await tokenService.generateNewTokens(payload)
+
+      await prisma.token.create({
+        data: {
+          userId: user!.id,
+          refreshToken
+        }
+      })
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        maxAge: 1000 * settings.tokenLife.refreshToken
+      })
+
+      res.status(200).json({
+        accessToken
+      })
+    } catch (e) {
+      console.log(e)
     }
   }
 
+
+
+
+
+
+
+  
 
   activation = async (req: express.Request, res: express.Response) => {
     const messages = []
@@ -52,7 +68,7 @@ class UserController {
     }
   }
 
-  activationGet = async (req:express.Request, res:express.Response) => {
+  activationGet = async (req: express.Request, res: express.Response) => {
     res.status(400).send()
   }
 }

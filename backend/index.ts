@@ -19,6 +19,9 @@ app.use(cookieParser())
 app.use(Fingerprint())
 app.use(process.env.API_PREFIX!, router)
 
+/**
+ * Test point
+ */
 app.get('/', (req, res) => {
 
   // if (!req.cookies.refreshToken) {

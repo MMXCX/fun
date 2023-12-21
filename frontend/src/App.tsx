@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react'
 import parse from 'html-react-parser'
 import './App.css'
-// import Login from './components/login.tsx'
-import { gapi } from 'gapi-script'
-// import Logout from './components/logout.tsx'
 import { CaptchaApi, AuthApi } from './api'
 import axios from 'axios'
 
@@ -37,25 +34,15 @@ const App = () => {
       },
       {
         withCredentials: true,
-        baseURL: process.env.API_URL
+        baseURL: import.meta.env.VITE_API_URL
       })
       .then(res => console.log(res.status, res.data))
 
     getCaptchaData()
   }
 
-  const clientId = '911504240229-1ulu9j821fe73l6eivjss1ilbq46m9kv.apps.googleusercontent.com'
-
   useEffect(() => {
     getCaptchaData()
-
-    const start = () => {
-      gapi.client.init({
-        clientId,
-        scope: ''
-      })
-    }
-    gapi.load('client:auth2', start)
 
     /**
      * On change Local Storage
@@ -92,8 +79,6 @@ const App = () => {
       </div>
       <button onClick={sendRegisterData}>Register</button>
       <button onClick={sendTestRequest}>Send</button>
-      {/*<Login clientId={clientId}/>*/}
-      {/*<Logout clientId={clientId}/>*/}
     </>
   )
 }

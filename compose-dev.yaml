@@ -8,7 +8,8 @@ services:
     ports:
       - '${CLIENT_PORT}:3000'
     environment:
-      - API_URL=${API_URL}
+      - VITE_API_URL=${API_URL}
+      - VITE_API_PREFIX=${API_PREFIX}
     volumes:
       - ./frontend:/app
     working_dir: /app
@@ -27,6 +28,8 @@ services:
       - API_HOST=${API_HOST}
       - API_PORT=${API_PORT}
       - API_PREFIX=${API_PREFIX}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
       - ./backend:/app
     working_dir: /app
@@ -39,7 +42,7 @@ services:
 #    container_name: fi_mysql
 #    restart: unless-stopped
 #    environment:
-#      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+#      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
 #    volumes:
 #      - ./mysql:/var/lib/mysql
 #    ports:
@@ -52,9 +55,9 @@ services:
     container_name: fi_postgres
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - POSTGRES_DB=funinvest
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./postgres:/var/lib/postgresql/data
     ports:
@@ -70,7 +73,7 @@ services:
 #    environment:
 #      - PMA_HOST=mysql
 #      - PMA_USER=root
-#      - PMA_PASSWORD=${MYSQL_ROOT_PASSWORD}
+#      - PMA_PASSWORD=${DB_PASSWORD}
 #    networks:
 #      - mysql-phpmyadmin
 networks:
