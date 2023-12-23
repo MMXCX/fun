@@ -38,6 +38,34 @@ class UserController {
     }
   }
 
+  logout = async (req: express.Request, res: express.Response) => {
+    if (req.cookies.refreshToken) {
+      res.clearCookie('refreshToken')
+      res.status(200).json({
+        status: 'ok',
+        message: 'success'
+      })
+    } else {
+      res.status(400).json({
+        status: 'error',
+        message: 'U are not authorized'
+      })
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

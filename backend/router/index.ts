@@ -7,6 +7,8 @@ import authValidator from '../validators/authValidator'
 const router = express.Router()
 
 router.post('/registration', authValidator.registration, userController.registration)
+router.get('/logout', userController.logout)
+
 
 
 
