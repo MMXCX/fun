@@ -43,3 +43,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at ${host}:${port}`)
 })
+https://www.youtube.com/watch?v=_W3R2VwRyF4
