@@ -3,6 +3,7 @@ backend/node_modules
 backend/bun.lockb
 
 frontend/dist
+frontend/src/api
 frontend/node_modules
 frontend/bun.lockb
 
