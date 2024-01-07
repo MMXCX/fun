@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  openapi-generator-cli:
+    image: openapitools/openapi-generator-cli:${OPENAPI_GENERATOR}
+    container_name: fi_openapi-generator-cli
+    restart: no
+    environment:
+      - API_HOST=${API_HOST}
+      - API_PORT=${API_PORT}
+      - API_PREFIX=${API_PREFIX}
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: >
+      bash -c '
+      docker-entrypoint.sh generate --server-variables=api_host=${API_HOST},api_port=${API_PORT},api_prefix=${API_PREFIX} -i openapi.yaml -g typescript-axios -o /app/frontend/src/api'
   frontend:
     image: node:${NODE_VERSION}
     container_name: fi_frontend
@@ -8,17 +22,17 @@ services:
     ports:
       - '${CLIENT_PORT}:3000'
     environment:
-      - API_URL=${API_URL}
+      - VITE_API_URL=${API_URL}
+      - VITE_API_PREFIX=${API_PREFIX}
     volumes:
       - ./frontend:/app
     working_dir: /app
     command: >
       bash -c '
-      npm run build
+      npm i
+      && npm run build
       && npm i -g serve
       && serve ./dist -s'
-    networks:
-      - frontend
   backend:
     image: node:${NODE_VERSION}
     container_name: fi_backend
@@ -31,26 +45,20 @@ services:
       - API_HOST=${API_HOST}
       - API_PORT=${API_PORT}
       - API_PREFIX=${API_PREFIX}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
       - ./backend:/app
     working_dir: /app
     command: >
       bash -c '
-      npx tsc
+      npm i
+      && npx prisma generate
+      && npx prisma migrate dev --name init
+      && npx tsc
       && npm run start'
     networks:
-      - backend-mysql
       - backend-postgres
-#  mysql:
-#    image: mysql:${MYSQL_VERSION}
-#    container_name: fi_mysql
-#    restart: unless-stopped
-#    environment:
-#      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-#    volumes:
-#      - ./mysql:/var/lib/mysql
-#    networks:
-#      - backend-mysql
   postgres:
     image: postgres:${POSTGRES_VERSION}
     container_name: fi_postgres
@@ -64,6 +72,4 @@ services:
     networks:
       - backend-postgres
 networks:
-  backend-mysql:
-  frontend:
   backend-postgres:

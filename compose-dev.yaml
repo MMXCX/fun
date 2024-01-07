@@ -31,8 +31,6 @@ services:
       bash -c '
       npm i
       && npm run dev'
-    networks:
-      - frontend
   backend:
     image: node:${NODE_VERSION}
     container_name: fi_backend
@@ -57,7 +55,6 @@ services:
       && npx prisma migrate dev --name init
       && npm run dev'
     networks:
-      - backend-mysql
       - backend-postgres
   postgres:
     image: postgres:${POSTGRES_VERSION}
@@ -73,20 +70,5 @@ services:
       - '5432:5432'
     networks:
       - backend-postgres
-#  phpmyadmin:
-#    image: phpmyadmin:${PHPMYADMIN_VERSION}
-#    container_name: fi_phpmyadmin
-#    restart: unless-stopped
-#    ports:
-#      - '8080:80'
-#    environment:
-#      - PMA_HOST=mysql
-#      - PMA_USER=root
-#      - PMA_PASSWORD=${DB_PASSWORD}
-#    networks:
-#      - mysql-phpmyadmin
 networks:
-  backend-mysql:
   backend-postgres:
-  frontend:
-  mysql-phpmyadmin:
